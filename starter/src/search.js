@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import Book from "./book";
 
 const SearchBook = ({ updateShelf }) => {
+  const [shelfBooks, setShelfBooks] = useState([]);
   const [booksFound, setBooksFound] = useState([]);
   const [queryBook, setQueryBook] = useState("");
 
@@ -17,6 +18,14 @@ const SearchBook = ({ updateShelf }) => {
     };
     bookSearch();
   }, [queryBook]);
+
+  useEffect(() => {
+    const getBooks = async () => {
+      const res = await BookAPI.getAll();
+      setShelfBooks(res);
+    };
+    getBooks();
+  }, []);
 
   return (
     <div className="search-books">
@@ -38,11 +47,15 @@ const SearchBook = ({ updateShelf }) => {
           <div>
             <strong>{booksFound.length} books found </strong>
             <ol className="books-grid">
-              {booksFound.map((book) => (
-                <li key={book.id}>
-                  <Book book={book} updateShelf={updateShelf} />
-                </li>
-              ))}
+              {booksFound.map((book) => {
+                let shelf = shelfBooks.filter((sbook) => sbook.id === book.id);
+                book.shelf = shelf.length > 0 ? shelf[0].shelf : book.shelf;
+                return (
+                  <li key={book.id}>
+                    <Book book={book} updateShelf={updateShelf} />
+                  </li>
+                );
+              })}
             </ol>
           </div>
         )}
